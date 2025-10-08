@@ -39,12 +39,11 @@ public class HarvardProcessor {
 
     public void executeProgram() {
         boolean running = true;
-        int cycle = 0;
 
         System.out.println("=== НАЧАЛО ВЫПОЛНЕНИЯ ПРОГРАММЫ ===");
 
-        while (running && programCounter < programMemory.length && cycle < 100) {
-            System.out.printf("\n--- Цикл %d, PC = %d ---\n", ++cycle, programCounter);
+        while (running && programCounter < programMemory.length ) {
+            System.out.printf("\n---  PC = %d ---\n", programCounter);
 
             fetchInstruction();
             running = executeInstruction();
@@ -78,7 +77,6 @@ public class HarvardProcessor {
         int dest = currentInstruction.getDest();
         int op1 = currentInstruction.getOp1();
         int op2 = currentInstruction.getOp2();
-
         switch (cmdType) {
             case LOAD:
                 // LOAD literal, Rdest, Rop1, Rop2
@@ -89,7 +87,6 @@ public class HarvardProcessor {
                         dest, op1, literal, loadAddress, registers[dest]);
                 programCounter++;
                 break;
-
             case STORE:
                 // STORE literal, Rdest, Rop1, Rop2
                 // Сохранение Rop1 в память по адресу [Rdest + literal]
@@ -99,16 +96,13 @@ public class HarvardProcessor {
                         dest, literal, storeAddress, op1, dataMemory[storeAddress]);
                 programCounter++;
                 break;
-
             case ADD:
                 // ADD literal, Rdest, Rop1, Rop2
-                // Rdest = Rop1 + Rop2
+                // Rdest = Rop1 + Rop2+literal
                 registers[dest] = registers[op1] + registers[op2]+literal;
-                System.out.printf("ADD: R%d = R%d + R%d = %d\n",
-                        dest, op1, op2, registers[dest]);
+                System.out.printf("ADD: R%d = R%d + R%d = %d\n", dest, op1, op2, registers[dest]);
                 programCounter++;
                 break;
-
             case SUB:
                 // SUB literal, Rdest, Rop1, Rop2
                 // Rdest = Rop1 - Rop2
@@ -117,16 +111,6 @@ public class HarvardProcessor {
                         dest, op1, op2, registers[dest]);
                 programCounter++;
                 break;
-
-            case MUL:
-                // MUL literal, Rdest, Rop1, Rop2
-                // Rdest = Rop1 * Rop2
-                registers[dest] = registers[op1] * registers[op2];
-                System.out.printf("MUL: R%d = R%d * R%d = %d\n",
-                        dest, op1, op2, registers[dest]);
-                programCounter++;
-                break;
-
             case CMP:
                 // CMP literal, Rdest, Rop1, Rop2
                 // Rdest = sign(Rop1 - Rop2)
@@ -136,17 +120,15 @@ public class HarvardProcessor {
                         dest, op1, op2, registers[dest]);
                 programCounter++;
                 break;
-
             case JUMP:
                 // JUMP literal, Rdest, Rop1, Rop2
                 // Безусловный переход на адрес literal
                 programCounter = literal;
                 System.out.printf("JUMP: PC = %d\n", programCounter);
                 break;
-
             case JUMP_EQ:
                 // JUMP_EQ literal, Rdest, Rop1, Rop2
-                // Переход если Rdest == 0
+                // Переход если Rdest >= 0
                 if (registers[dest] >= 0) {
                     programCounter = literal;
                     System.out.printf("JUMP_EQ: R%d >= 0, PC = %d\n", dest, programCounter);
@@ -155,10 +137,9 @@ public class HarvardProcessor {
                     System.out.printf("JUMP_EQ: R%d <= 0, no jump\n", dest);
                 }
                 break;
-
             case JUMP_GT:
                 // JUMP_GT literal, Rdest, Rop1, Rop2
-                // Переход если Rdest > 0
+                // Переход если Rdest < 0
                 if (registers[dest] < 0) {
                     programCounter = literal;
                     System.out.printf("JUMP_GT: R%d < 0, PC = %d\n", dest, programCounter);
