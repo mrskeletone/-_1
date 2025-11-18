@@ -28,9 +28,8 @@ public class HarvardProcessor {
     }
 
     public void initializeDataMemory(int[] array) {
-        dataMemory[0] = array.length;
         for (int i = 0; i < array.length; i++) {
-            dataMemory[i + 1] = array[i];
+            dataMemory[i] = array[i];
         }
     }
 
@@ -41,23 +40,24 @@ public class HarvardProcessor {
         boolean running = true;
 
         System.out.println("=== НАЧАЛО ВЫПОЛНЕНИЯ ПРОГРАММЫ ===");
-
+        long before =System.currentTimeMillis();
         while (running && programCounter < programMemory.length ) {
-            System.out.printf("\n---  PC = %d ---\n", programCounter);
+           // System.out.printf("\n---  PC = %d ---\n", programCounter);
 
             fetchInstruction();
             running = executeInstruction();
 
-            printRegisters();
+           // printRegisters();
         }
-
-        System.out.println("\n=== ВЫПОЛНЕНИЕ ПРОГРАММЫ ЗАВЕРШЕНО ===");
+        long after =System.currentTimeMillis();
+        System.out.print("Время выполнения = "+(after-before));
+        System.out.print("\n=== ВЫПОЛНЕНИЕ ПРОГРАММЫ ЗАВЕРШЕНО ===");
     }
 
     private void fetchInstruction() {
         int instructionWord = programMemory[programCounter];
         currentInstruction = decodeInstruction(instructionWord);
-        System.out.printf("Выбрана инструкция: %s\n", currentInstruction);
+       // System.out.printf("Выбрана инструкция: %s\n", currentInstruction);
     }
 
     private Instruction decodeInstruction(int instructionWord) {
@@ -83,32 +83,32 @@ public class HarvardProcessor {
                 // Загрузка из памяти по адресу [Rop1 + literal] в Rdest
                 int loadAddress = registers[op1] + literal;
                 registers[dest] = dataMemory[loadAddress];
-                System.out.printf("LOAD: R%d = MEM[R%d + %d] = MEM[%d] = %d\n",
-                        dest, op1, literal, loadAddress, registers[dest]);
+//                System.out.printf("LOAD: R%d = MEM[R%d + %d] = MEM[%d] = %d\n",
+//                        dest, op1, literal, loadAddress, registers[dest]);
                 programCounter++;
                 break;
             case STORE:
                 // STORE literal, Rdest, Rop1, Rop2
-                // Сохранение Rop1 в память по адресу [Rdest + literal]
+                // Сохранение Rop1 в память по адресу [Rdest] + literal
                 int storeAddress = registers[dest] + literal;
                 dataMemory[storeAddress] = registers[op1];
-                System.out.printf("STORE: MEM[R%d + %d] = MEM[%d] = R%d = %d\n",
-                        dest, literal, storeAddress, op1, dataMemory[storeAddress]);
+//                System.out.printf("STORE: MEM[R%d + %d] = MEM[%d] = R%d = %d\n",
+//                        dest, literal, storeAddress, op1, dataMemory[storeAddress]);
                 programCounter++;
                 break;
             case ADD:
                 // ADD literal, Rdest, Rop1, Rop2
                 // Rdest = Rop1 + Rop2+literal
                 registers[dest] = registers[op1] + registers[op2]+literal;
-                System.out.printf("ADD: R%d = R%d + R%d = %d\n", dest, op1, op2, registers[dest]);
+//                System.out.printf("ADD: R%d = R%d + R%d = %d\n", dest, op1, op2, registers[dest]);
                 programCounter++;
                 break;
             case SUB:
                 // SUB literal, Rdest, Rop1, Rop2
-                // Rdest = Rop1 - Rop2
-                registers[dest] = registers[op1] - registers[op2];
-                System.out.printf("SUB: R%d = R%d - R%d = %d\n",
-                        dest, op1, op2, registers[dest]);
+                // Rdest = Rop1 - Rop2-literal
+                registers[dest] = registers[op1] - registers[op2]-literal;
+//                System.out.printf("SUB: R%d = R%d - R%d = %d\n",
+//                        dest, op1, op2, registers[dest]);
                 programCounter++;
                 break;
             case CMP:
@@ -116,25 +116,25 @@ public class HarvardProcessor {
                 // Rdest = sign(Rop1 - Rop2)
                 int cmpResult = registers[op1] - registers[op2];
                 registers[dest] = Integer.compare(cmpResult, 0);
-                System.out.printf("CMP: R%d = compare(R%d, R%d) = %d\n",
-                        dest, op1, op2, registers[dest]);
+//                System.out.printf("CMP: R%d = compare(R%d, R%d) = %d\n",
+//                        dest, op1, op2, registers[dest]);
                 programCounter++;
                 break;
             case JUMP:
                 // JUMP literal, Rdest, Rop1, Rop2
                 // Безусловный переход на адрес literal
                 programCounter = literal;
-                System.out.printf("JUMP: PC = %d\n", programCounter);
+              //  System.out.printf("JUMP: PC = %d\n", programCounter);
                 break;
             case JUMP_EQ:
                 // JUMP_EQ literal, Rdest, Rop1, Rop2
                 // Переход если Rdest >= 0
                 if (registers[dest] >= 0) {
                     programCounter = literal;
-                    System.out.printf("JUMP_EQ: R%d >= 0, PC = %d\n", dest, programCounter);
+                //    System.out.printf("JUMP_EQ: R%d >= 0, PC = %d\n", dest, programCounter);
                 } else {
                     programCounter++;
-                    System.out.printf("JUMP_EQ: R%d <= 0, no jump\n", dest);
+                 //   System.out.printf("JUMP_EQ: R%d <= 0, no jump\n", dest);
                 }
                 break;
             case JUMP_GT:
@@ -142,15 +142,15 @@ public class HarvardProcessor {
                 // Переход если Rdest < 0
                 if (registers[dest] < 0) {
                     programCounter = literal;
-                    System.out.printf("JUMP_GT: R%d < 0, PC = %d\n", dest, programCounter);
+                  //  System.out.printf("JUMP_GT: R%d < 0, PC = %d\n", dest, programCounter);
                 } else {
                     programCounter++;
-                    System.out.printf("JUMP_GT: R%d >= 0, no jump\n", dest);
+                  //  System.out.printf("JUMP_GT: R%d >= 0, no jump\n", dest);
                 }
                 break;
 
             case HALT:
-                System.out.println("HALT: Processor stopped");
+                //System.out.println("HALT: Processor stopped");
                 return false;
 
             default:
